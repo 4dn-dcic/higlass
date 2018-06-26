@@ -2,8 +2,9 @@ import { bisector } from 'd3-array';
 import { format } from 'd3-format';
 import { absToChr } from './utils';
 
-export class SearchField {
+class SearchField {
   constructor(chromInfo) {
+    //console.trace('chromInfo:', chromInfo)
     this.chromInfo = chromInfo;
     this.chromInfoBisector = bisector(d => d.pos).left;
   }
@@ -137,7 +138,7 @@ export class SearchField {
 
     if (term.length == 0) { return null; }
 
-    // shitty ass regex to deal with negative positions 
+    // shitty ass regex to deal with negative positions
     // (which aren't even valid genomic coordinates)
     let parts = term.split('-'); // split on a
     parts = parts.filter(d => d.length > 0);
@@ -224,9 +225,6 @@ export class SearchField {
     const sparts1 = parts[1].split(',');
     return [[+sparts0[0], +sparts0[1]],
       [+sparts1[0], +sparts1[1]]];
-
-
-    return [[0, 0], [0, 0]];
   }
 
   searchPosition(text) {

@@ -1,31 +1,16 @@
 import { scaleLinear, scaleLog } from 'd3-scale';
 
-import { HorizontalLine1DPixiTrack } from './HorizontalLine1DPixiTrack';
+import HorizontalLine1DPixiTrack from './HorizontalLine1DPixiTrack';
 
 // Utils
 import { colorToHex, dictValues } from './utils';
 
-export class BarTrack extends HorizontalLine1DPixiTrack {
-  constructor( scene, dataConfig, handleTilesetInfoReceived, option,
-    animate,
-    onValueScaleChanged,
-  ) {
-    super( scene, dataConfig, handleTilesetInfoReceived, option, animate,
-      onValueScaleChanged,
-    );
-  }
-
+class BarTrack extends HorizontalLine1DPixiTrack {
   initTile(tile) {
     /**
          * Create whatever is needed to draw this tile.
          */
     super.initTile(tile);
-
-    // console.log('initializing tile');
-    tile.barXValues = new Array(tile.tileData.dense.length);
-    tile.barYValues = new Array(tile.tileData.dense.length);
-    tile.barWidths = new Array(tile.tileData.dense.length);
-    tile.barHeights = new Array(tile.tileData.dense.length);
 
     // this.drawTile(tile);
     this.renderTile(tile);
@@ -36,6 +21,18 @@ export class BarTrack extends HorizontalLine1DPixiTrack {
     // doesn't do anything
   }
 
+  updateTile(tile) {
+    // console.log('tile.valueScale', tile.valueScale, 'this.scale', this.scale);
+    if (tile.valueScale && this.scale && 
+      this.scale.minValue == tile.scale.minValue && 
+      this.scale.maxValue == tile.scale.maxValue) {
+      // already rendered properly, no need to rerender
+    } else {
+      // not rendered using the current scale, so we need to rerender
+      this.renderTile(tile);
+    }
+  }
+
   renderTile(tile) {
     //super.drawTile(tile);
 
@@ -43,32 +40,18 @@ export class BarTrack extends HorizontalLine1DPixiTrack {
 
     const graphics = tile.graphics;
 
-    const { tileX, tileWidth } = this.getTilePosAndDimensions(tile.tileData.zoomLevel, tile.tileData.tilePos);
+    const { tileX, tileWidth } = this.getTilePosAndDimensions(tile.tileData.zoomLevel, 
+      tile.tileData.tilePos, 
+      this.tilesetInfo.bins_per_dimension || this.tilesetInfo.tile_size);
     const tileValues = tile.tileData.dense;
 
     if (tileValues.length == 0) { return; }
 
-    let pseudocount = 0; // if we use a log scale, then we'll set a pseudocount
     // equal to the smallest non-zero value
-    this.valueScale = null;
-
-    // console.log('valueScaling:', this.options.valueScaling);
-    if (this.options.valueScaling == 'log') {
-      let offsetValue = this.medianVisibleValue;
-
-      if (!this.medianVisibleValue) { offsetValue = this.minVisibleValue(); }
-
-      this.valueScale = scaleLog()
-        // .base(Math.E)
-        .domain([offsetValue, this.maxValue() + offsetValue])
-        .range([this.dimensions[1], 0]);
-      pseudocount = offsetValue;
-    } else {
-      // linear scale
-      this.valueScale = scaleLinear()
-        .domain([this.minValue(), this.maxValue()])
-        .range([this.dimensions[1], 0]);
-    }
+    const [vs, pseudocount] = this.makeValueScale(this.minVisibleValue(), this.medianVisibleValue,  
+      this.maxValue(), 0);
+    this.valueScale = vs;
+    // console.log('pseudocount:', pseudocount, this.valueScale.domain());
 
     graphics.clear();
 
@@ -82,7 +65,7 @@ export class BarTrack extends HorizontalLine1DPixiTrack {
     const stroke = colorToHex(this.options.lineStrokeColor ? this.options.lineStrokeColor : 'blue');
     // this scale should go from an index in the data array to
     // a position in the genome coordinates
-    const tileXScale = scaleLinear().domain([0, this.tilesetInfo.tile_size])
+    const tileXScale = scaleLinear().domain([0, this.tilesetInfo.tile_size || this.tilesetInfo.bins_per_dimension])
       .range([tileX, tileX + tileWidth]);
 
     // let strokeWidth = this.options.lineStrokeWidth ? this.options.lineStrokeWidth : 1;
@@ -90,10 +73,12 @@ export class BarTrack extends HorizontalLine1DPixiTrack {
     const strokeWidth = 0;
     graphics.lineStyle(strokeWidth, stroke, 1);
 
-    const color = colorToHex(this.options.barFillColor ? this.options.barFillColor : 'grey');
+    const color = this.options.barFillColor ? this.options.barFillColor : 'grey'
+    const colorHex = colorToHex(color);
+
     const opacity = 'barOpacity' in this.options ? this.options.barOpacity : 1;
 
-    graphics.beginFill(color, opacity);
+    graphics.beginFill(colorHex, opacity);
 
     const j = 0;
     tile.drawnAtScale = this._xScale.copy();
@@ -101,14 +86,12 @@ export class BarTrack extends HorizontalLine1DPixiTrack {
     for (let i = 0; i < tileValues.length; i++) {
       const xPos = this._xScale(tileXScale(i));
       const yPos = this.valueScale(tileValues[i] + pseudocount);
+      // console.log('tileValues[i]', tileValues[i], yPos, this.valueScale.domain(), this.valueScale.range());
 
       const width = this._xScale(tileXScale(i + 1)) - xPos;
       const height = this.dimensions[1] - yPos;
 
-      tile.barXValues[i] = xPos;
-      tile.barYValues[i] = yPos;
-      tile.barWidths[i] = width;
-      tile.barHeights[i] = height;
+      this.addSVGInfo(tile, xPos, yPos, width, height, color);
 
       if (tileXScale(i) > this.tilesetInfo.max_pos[0])
       // this data is in the last tile and extends beyond the length
@@ -146,6 +129,35 @@ export class BarTrack extends HorizontalLine1DPixiTrack {
   }
 
   /**
+   * Adds information to recreate the track in SVG to the tile
+   *
+   * @param tile
+   * @param x x value of bar
+   * @param y y value of bar
+   * @param width width of bar
+   * @param height height of bar
+   * @param color color of bar (not converted to hex)
+   */
+  addSVGInfo(tile, x, y, width, height, color) {
+    if (tile.hasOwnProperty('svgData')) {
+      tile.svgData.barXValues.push(x);
+      tile.svgData.barYValues.push(y);
+      tile.svgData.barWidths.push(width);
+      tile.svgData.barHeights.push(height);
+      tile.svgData.barColors.push(color);
+    }
+    else {
+      tile.svgData  = {
+        barXValues: [x],
+        barYValues: [y],
+        barWidths: [width],
+        barHeights: [height],
+        barColors: [color]
+      };
+    }
+  }
+
+  /**
    * Export an SVG representation of this track
    *
    * @returns {[DOMNode,DOMNode]} The two returned DOM nodes are both SVG
@@ -169,16 +181,23 @@ export class BarTrack extends HorizontalLine1DPixiTrack {
     const stroke = this.options.lineStrokeColor ? this.options.lineStrokeColor : 'blue';
 
     for (const tile of this.visibleAndFetchedTiles()) {
-      for (let i = 0; i < tile.barXValues.length; i++) {
-        const rect = document.createElement('rect');
-        const color = this.options.barFillColor ? this.options.barFillColor : 'grey';
-        rect.setAttribute('fill', color);
-        rect.setAttribute('stroke', color);
+      const data = tile.svgData;
+      if (!data || !data.barXValues)
+        continue;
 
-        rect.setAttribute('x', tile.barXValues[i]);
-        rect.setAttribute('y', tile.barYValues[i]);
-        rect.setAttribute('height', tile.barHeights[i]);
-        rect.setAttribute('width', tile.barWidths[i]);
+      for (let i = 0; i < data.barXValues.length; i++) {
+        const rect = document.createElement('rect');
+        rect.setAttribute('fill', data.barColors[i]);
+        rect.setAttribute('stroke', data.barColors[i]);
+
+        rect.setAttribute('x', data.barXValues[i]);
+        rect.setAttribute('y', data.barYValues[i]);
+        rect.setAttribute('height', data.barHeights[i]);
+        rect.setAttribute('width', data.barWidths[i]);
+        if (tile.barBorders) {
+          rect.setAttribute('stroke-width', '0.1');
+          rect.setAttribute('stroke', 'black');
+        }
 
         output.appendChild(rect);
       }

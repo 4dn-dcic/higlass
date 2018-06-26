@@ -3,7 +3,7 @@ import {
   precisionPrefix,
 } from 'd3-format';
 
-import { HeatmapOptions } from '../HeatmapOptions';
+import HeatmapOptions from '../HeatmapOptions';
 
 const AVAILABLE_COLORS = {
   black: { name: 'Black', value: 'black' },
@@ -26,6 +26,7 @@ const AVAILABLE_WIDTHS = {
   5: { name: '5', value: 5 },
   8: { name: '8', value: 8 },
   13: { name: '13', value: 13 },
+  21: { name: '21', value: 21 },
 };
 const AVAILABLE_WIDTHS_AND_NONE = Object.assign(AVAILABLE_WIDTHS, {
   'none': { name: 'none', value: 'none'}});
@@ -39,6 +40,8 @@ const OPACITY_OPTIONS = {
   '1.0': { name: '100%', value: 1.0 },
 };
 
+// these values define the options that are visible in the track config
+// menu
 export const OPTIONS_INFO = {
   heatmapValueScaling: {
     name: 'Value Scaling',
@@ -58,9 +61,20 @@ export const OPTIONS_INFO = {
     name: 'Stroke Width',
     inlineOptions: AVAILABLE_WIDTHS,
   },
+  strokeWidth: {
+    name: 'Stroke Width',
+    inlineOptions: AVAILABLE_WIDTHS,
+  },
   trackBorderWidth: {
     name: 'Track Border Width',
     inlineOptions: AVAILABLE_WIDTHS,
+  },
+  sortLargestOnTop: {
+    name: 'Sort Largest On Top',
+    inlineOptions: {
+      yes: { name: 'Yes', value: true},
+      no: { name: 'No', value: false }
+    }
   },
   minSquareSize: {
     name: 'Minimum size',
@@ -77,6 +91,55 @@ export const OPTIONS_INFO = {
   trackBorderColor: {
     name: 'Track Border Color',
     inlineOptions: AVAILABLE_COLORS,
+  },
+  backgroundColor: {
+    name: 'Background Color',
+    inlineOptions: {
+      white: { name: 'White', value: 'white' },
+      lightGrey: { name: 'Light Grey', value: '#eeeeee' },
+      grey: { name: 'Grey', value: '#cccccc' },
+      black: { name: 'Black', value: 'black' },
+      transparent: { name: 'Transparent', value: 'transparent' },
+    },
+  },
+  colorScale: {
+    name: 'Color Scale',
+    inlineOptions: {
+      epilogos: { name: 'Epilogos',
+        values: [
+          '#FF0000',
+          '#FF4500',
+          '#32CD32',
+          '#008000',
+          '#006400',
+          '#C2E105',
+          '#FFFF00',
+          '#66CDAA',
+          '#8A91D0',
+          '#CD5C5C',
+          '#E9967A',
+          '#BDB76B',
+          '#808080',
+          '#C0C0C0',
+          '#FFFFFF'
+        ],
+      },
+      category10: {
+        name: 'D3 Category10',
+        values: [
+          '#1F77B4',
+          '#FF7F0E',
+          '#2CA02C',
+          '#D62728',
+          '#9467BD',
+          '#8C564B',
+          '#E377C2',
+          '#7F7F7F',
+          '#BCBD22',
+          '#17BECF'
+        ]
+      }
+    },
   },
   minusStrandColor: {
     name: '- Strand Color',
@@ -98,13 +161,43 @@ export const OPTIONS_INFO = {
     name: 'Fill color',
     inlineOptions: AVAILABLE_COLORS,
   },
+  strokeColor: {
+    name: 'Stroke color',
+    inlineOptions: AVAILABLE_COLORS,
+  },
+  fillColor: {
+    name: 'Fill color',
+    inlineOptions: AVAILABLE_COLORS,
+  },
   barFillColor: {
     name: 'Fill color',
+    inlineOptions: AVAILABLE_COLORS,
+  },
+  barFillColorTop: {
+    name: 'Top Fill color',
+    inlineOptions: AVAILABLE_COLORS,
+  },
+  barFillColorBottom: {
+    name: 'Bottom Fill color',
     inlineOptions: AVAILABLE_COLORS,
   },
   barOpacity: {
     name: 'Bar opacity',
     inlineOptions: OPACITY_OPTIONS,
+  },
+  barBorder: {
+    name: 'Bar border',
+    inlineOptions: {
+      yes: { name: 'Yes', value: true},
+      no: { name: 'No', value: false },
+    },
+  },
+  scaledHeight: {
+    name: 'Scaled height',
+    inlineOptions: {
+      yes: { name: 'Yes', value: true},
+      no: { name: 'No', value: false },
+    },
   },
   rectangleDomainStrokeColor: {
     name: 'Stroke color',
@@ -186,6 +279,20 @@ export const OPTIONS_INFO = {
       no: { name: 'No', value: null },
     },
   },
+  showMousePosition: {
+    name: 'Show Mouse Position',
+    inlineOptions: {
+      yes: { name: 'Yes', value: true},
+      no: { name: 'No', value: false },
+    },
+  },
+  showTooltip: {
+    name: 'Show Tooltip',
+    inlineOptions: {
+      yes: { name: 'Yes', value: true},
+      no: { name: 'No', value: false },
+    },
+  },
   axisPositionHorizontal: {
     name: 'Axis Position',
     inlineOptions: {
@@ -217,6 +324,16 @@ export const OPTIONS_INFO = {
       bottomRight: { name: 'Bottom Right', value: 'bottomRight' },
       hidden: { name: 'Hidden', value: null },
     },
+  },
+
+  colorbarBackgroundColor: {
+    name: 'Colorbar Background Color',
+    inlineOptions: AVAILABLE_COLORS,
+  },
+
+  colorbarBackgroundOpacity: {
+    name: 'Colorbar Background Opacity',
+    inlineOptions: OPACITY_OPTIONS,
   },
 
   /*
@@ -264,9 +381,23 @@ export const OPTIONS_INFO = {
     inlineOptions: OPACITY_OPTIONS,
   },
 
+  labelBackgroundColor: {
+    name: 'Label Background Color',
+    inlineOptions: AVAILABLE_COLORS,
+  },
+
   labelBackgroundOpacity: {
     name: 'Label Background Opacity',
     inlineOptions: OPACITY_OPTIONS,
+  },
+
+  viewResolution: {
+    name: 'View Resolution',
+    inlineOptions: {
+      high: { name: 'High', value: 384},
+      medium: { name: 'Medium', value: 1024},
+      low: { name: 'Low', value: 2048},
+    },
   },
 
   // colormaps are mostly taken from here:
@@ -386,6 +517,7 @@ export const OPTIONS_INFO = {
         name: 'Custom...',
         componentPickers: {
           heatmap: HeatmapOptions,
+          'horizontal-heatmap': HeatmapOptions,
         },
       },
     },
@@ -431,20 +563,26 @@ export const OPTIONS_INFO = {
           const binsPerDimension = track.binsPerDimension;
           const maxZoom = track.maxZoom;
 
-          const resolution = track.maxWidth / (2 ** i * track.binsPerDimension);
+          let maxResolutionSize = 1;
+          let resolution = 1;
 
-          const maxResolutionSize = maxWidth / (2 ** maxZoom * binsPerDimension);
+          if (track.resolutions) {
+            const sortedResolutions = track.resolutions.map(x => +x).sort((a,b) => b-a)
+            maxResolutionSize = sortedResolutions[0];
+            resolution = sortedResolutions[i];
+          } else {
+            resolution = track.maxWidth / (2 ** i * track.binsPerDimension);
+            maxResolutionSize = maxWidth / (2 ** maxZoom * binsPerDimension);
+          }
 
           const pp = precisionPrefix(maxResolutionSize, resolution);
           const f = formatPrefix(`.${pp}`, resolution);
           const formattedResolution = f(resolution);
 
-          // const formattedName =  ;
           inlineOptions.push({
             name: formattedResolution,
             value: i.toString(),
           });
-
           //
         }
 
@@ -459,6 +597,7 @@ export const OPTIONS_INFO = {
       none: { name: 'None', value: null },
     },
     generateOptions: (track) => {
+      console.log('track:', track);
       if (!track.header)
         return [];
 

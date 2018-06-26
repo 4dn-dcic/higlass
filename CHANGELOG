@@ -1,3 +1,173 @@
+v1.0.3
+
+- Fixed cross rule bug
+
+v1.0.2
+
+- Added vertical divergent bar tracks
+- Fixed export in SVG
+- Fix mouseover error when trackrenderer hasn't been initialized yet
+- Added zoomFixed option to the top level of the viewconf
+- Use transpiled version of `mixwith.js`
+- Add options to change the background of the label and colorbar
+
+v1.0.1 (2018-06-14)
+
+- Fixed background export in SVG
+- Turned off line mouseover by default
+
+v1.0.0-alpha.12
+
+- Fixed long loading bug on zoomed in genes
+
+v1.0.0-alpha.11
+
+- Fixed gene stretching issues
+
+v1.0.0-alpha.10
+
+- Fixed background rendering after resizing
+- Fixed viewconf export link (use state.viewconf vs props.viewconf)
+
+v1.0.0-alpha.9
+
+- Fixed lock value scales
+
+v1.0.0-alpha.8
+
+- Fixed tooltip scrollbar appearance
+- Fixed context menu appearing issue
+
+v1.0.0-alpha.7
+
+- Fixed scrolling bug when multiple higlass components are on a single page
+- Fixed hover bug in combined tracks
+
+v1.0.0-alpha
+
+- Added triangles to genes
+- Preliminary authentication support
+- Added track for displaying gigapixel images
+- Added GeoJSON track and updated OSM track
+- Added mouseMoveZoom event to public API
+- Fixed and extended pubSub module
+- Added flexible per-track crosshair
+- Fixed and robustified range selection API
+- Display error message on error
+- Don't error when displaying menus when invalid track type is
+entered
+- Added an endpoint for sharing view configs as a link (`shareViewConfigAsLink()`) and exporting them as png and svg (`get('png' || 'svg')`)
+- Simplified `hglib` API
+- Updated third-party libs to get rid of deprecation warnings for React v16
+- Fixed small bug in placing rules
+- Display error when failing to retrieve tilesetInfo
+* Added support for cross-section tracks
+- Rendering improvements
+
+v0.10.22 (2018-02-22)
+
+- Added options to change the fill color of bedlike tracks
+
+v0.10.21 (2018-02-21)
+
+- Exposed the ChromosomeInfo structure as part of the hglib API
+
+?? v0.10.20 (2018-02-??
+
+- Rendering improvements
+
+?? v0.10.20 (2018-02-20)
+
+- Fixed api variable in HiGlassComponent
+- Fixed relToAbsChromPos so that it converts locations to numbers before
+adding
+- Added strokeWidth as an option to the viewport projection track
+
+v0.10.19 (2018-02-11)
+
+- Fixed the 2D chromosome labels track
+
+v0.10.18 (2018-02-11)
+
+- Fixed Horizontal2DTilesTrack
+
+v0.10.16 (2018-
+
+- Don't show the "Strange tileData" warnings
+- Pegged bootstrap to version 3.3.7
+
+v0.10.16 (2018-02-01)
+
+- Fixed a bug during active range selection when the _select_ mouse tool is deactivated
+
+v0.10.15 (2018-01-30)
+
+- Added the vertical bed-like track
+
+v0.10.13 (2018-01-25)
+
+- Added the multivec track
+
+v0.10.12 (2018-01-21)
+
+- Fixed pseudocounts in linear-scaled heatmaps
+
+v0.10.12 (2018-01-20)
+
+- Fixed get scale bug
+
+v0.10.11 (2018-01-17)
+
+- Fixed non-draggable views bug
+
+v0.10.10 (2018-01-17)
+
+- Default to log scaling if there are negative values
+- Fixed the custom colormap
+- Fix the gene annotations color changing
+- Fixed two regressions regarding the viewport projections
+
+v0.10.9 (2018-01-13)
+
+- Skipping a version because the latest version wasn't specified in
+package.json
+
+v0.10.8
+
+- Skipping a version because the latest version wasn't specified in
+package.json
+
+v0.10.7 (2018-01-13)
+
+- Show current data resolution in tiled sets containing raw resolutions rather
+than zoom levels
+
+v0.10.6 (2017-12-28)
+
+- Load ResizeSensors after the element is attached to the DOM tree
+- Added DivergentBarTrack
+- Fixed submenu hiding bug
+
+v0.10.5 (2017-12-27)
+
+- Fixed bug in TrackRenderer.setUpInitialScales where updating the view with
+new equivalent initial domains and different dimensions led to the view being
+misplaced
+- Added z-index to popup menus
+
+v0.10.4 (2017-12-16)
+
+- Fixed a bug in zoomToData
+- New API call for setViewConfig
+- New API call for zoomToDataExtent
+
+v0.10.3 (2017-12-13)
+
+- Don't include a colon if the port is 80
+- Added an option to clear the view
+- Exclude NaN values when setting the valueScale
+- Fixed bug related to displaying empty matrix tiles
+
 v0.10.2 (2017-12-12)
 
 - Fixed a bug in loading tileset info that isn't there
